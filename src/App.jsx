@@ -33,7 +33,7 @@ function App() {
         console.log("Decoded data:", decodedData);
         const parsedData = JSON.parse(decodedData);
 
-        console.log("Parsed data:", parsedData);  
+        console.log("Parsed data:", parsedData);
 
         setFormData({
           name: parsedData.name || "",
