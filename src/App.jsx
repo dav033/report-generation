@@ -9,6 +9,7 @@ import RowTextArea from "./components/table/RowTextArea.tsx";
 import ImageUploader from "./components/ImageUploader.tsx";
 
 function App() {
+  const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState([
     { area: "", category: "", comments: "", data_Sheet: "" },
   ]);
@@ -60,6 +61,7 @@ function App() {
   }, []);
 
   const sendImageRequest = async (image, index) => {
+    setLoading(true);
     const apiUrl = "https://hook.us1.make.com/gzmqvlipalsjxohvjncgtoe7xb8yxmx5";
     const form = new FormData();
 
@@ -74,18 +76,20 @@ function App() {
         },
       });
 
-      // Include the original description in the response
+      setLoading(false);
       return {
         res: response.data,
         originalDescription: image.description,
       };
     } catch (error) {
       console.error(`Error uploading image ${index}:`, error);
+      setLoading(false);
       throw error;
     }
   };
 
   const sendFinalRequest = async (imageResponses) => {
+    setLoading(true);
     const apiUrl = "https://hook.us1.make.com/s5oznk6dyri2a9csbtyif4keiufhtwpw";
 
     try {
@@ -103,9 +107,11 @@ function App() {
       });
 
       console.log("Final request response:", response.data);
+      setLoading(false);
       return response.data;
     } catch (error) {
       console.error("Error in final request:", error);
+      setLoading(false);
       throw error;
     }
   };
@@ -160,118 +166,136 @@ function App() {
   };
 
   return (
-    <section className="py-20 px-20">
-      <form onSubmit={handleSubmit}>
-        <div className="mr-auto ml-auto bg-blue-">
-          <div className="grid grid-cols-2 gap-4 mb-6 w-3/4 mr-auto ml-auto">
-            <Input
-              label="Name"
-              id="name"
-              onChange={handleInputChange}
-              value={formData.name}
-            />
-            <Input
-              label="Address"
-              id="address"
-              onChange={handleInputChange}
-              value={formData.address}
-            />
+    <section className="min-h-screen w-full bg-white dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-8 md:px-6 lg:px-8">
+        {loading && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500"></div>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Form Fields Container */}
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Input
+                label="Name"
+                id="name"
+                onChange={handleInputChange}
+                value={formData.name}
+              />
+              <Input
+                label="Address"
+                id="address"
+                onChange={handleInputChange}
+                value={formData.address}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Input
+                label="Living area"
+                id="living_area"
+                onChange={handleInputChange}
+                value={formData.living_area}
+              />
+              <Input
+                label="Link"
+                id="link"
+                onChange={handleInputChange}
+                value={formData.link}
+              />
+            </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 w-3/4 mr-auto ml-auto">
-            <Input
-              label="Living area"
-              id="living_area"
-              onChange={handleInputChange}
-              value={formData.living_area}
-            />
-            <Input
-              label="Link"
-              id="link"
-              onChange={handleInputChange}
-              value={formData.link}
-            />
-          </div>
-        </div>
+          {/* Table Container */}
+          <div className="mt-8 overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <TableHead>
+                  <tr>
+                    <HeadCell>Area</HeadCell>
+                    <HeadCell>Category</HeadCell>
+                    <HeadCell>Comments</HeadCell>
+                    <HeadCell>Data Sheet</HeadCell>
+                    <HeadCell>Actions</HeadCell>
+                  </tr>
+                </TableHead>
 
-        <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 w-4/6 mr-auto ml-auto mt-16">
-          <table className="min-w-full divide-y-2 divide-gray-200 bg-white text-sm dark:divide-gray-700 dark:bg-gray-900">
-            <TableHead>
-              <tr>
-                <HeadCell>area</HeadCell>
-                <HeadCell>category</HeadCell>
-                <HeadCell>comments</HeadCell>
-                <HeadCell>data Sheet</HeadCell>
-                <HeadCell>Actions</HeadCell>
-              </tr>
-            </TableHead>
-
-            <TableBody>
-              {rows.map((row, index) => (
-                <tr key={index} className="text-gray-700 dark:text-gray-200">
-                  <td className="px-4 py-3">
-                    <RowInput
-                      value={row.area}
-                      onChange={(e) =>
-                        handleRowChange(index, "area", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <RowInput
-                      value={row.category}
-                      onChange={(e) =>
-                        handleRowChange(index, "category", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <RowTextArea
-                      value={row.comments}
-                      onChange={(e) =>
-                        handleRowChange(index, "comments", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <RowTextArea
-                      value={row.data_sheet}
-                      onChange={(e) =>
-                        handleRowChange(index, "data_sheet", e.target.value)
-                      }
-                    />
-                  </td>
-                  <td className="px-4 py-3">
-                    <button
-                      onClick={() => deleteRow(index)}
-                      className="bg-red-500 text-white px-3 py-1 rounded"
+                <TableBody>
+                  {rows.map((row, index) => (
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800"
                     >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </TableBody>
-          </table>
+                      <td className="p-4">
+                        <RowInput
+                          value={row.area}
+                          onChange={(e) =>
+                            handleRowChange(index, "area", e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="p-4">
+                        <RowInput
+                          value={row.category}
+                          onChange={(e) =>
+                            handleRowChange(index, "category", e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="p-4">
+                        <RowTextArea
+                          value={row.comments}
+                          onChange={(e) =>
+                            handleRowChange(index, "comments", e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="p-4">
+                        <RowTextArea
+                          value={row.data_sheet}
+                          onChange={(e) =>
+                            handleRowChange(index, "data_sheet", e.target.value)
+                          }
+                        />
+                      </td>
+                      <td className="p-4">
+                        <button
+                          onClick={() => deleteRow(index)}
+                          className="inline-flex items-center justify-center rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </TableBody>
+              </table>
+            </div>
+          </div>
 
-          <button
-            type="button"
-            onClick={handleAddRow}
-            className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
-          >
-            Add Row
-          </button>
-        </div>
+          {/* Buttons Container */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-start mt-6">
+            <button
+              type="button"
+              onClick={handleAddRow}
+              className="inline-flex items-center justify-center rounded-md bg-blue-500 px-6 py-3 text-sm font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              Add Row
+            </button>
 
-        <ImageUploader images={images} setImages={setImages} />
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center rounded-md bg-green-500 px-6 py-3 text-sm font-medium text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+            >
+              Submit Form
+            </button>
+          </div>
 
-        <button
-          type="submit"
-          className="bg-green-500 text-white px-4 py-2 rounded mt-6"
-        >
-          Submit Form
-        </button>
-      </form>
+          <ImageUploader images={images} setImages={setImages} />
+        </form>
+      </div>
     </section>
   );
 }

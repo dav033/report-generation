@@ -77,7 +77,7 @@ export default function ImageUploader({images, setImages}) {
                   <img
                     src={img.preview}
                     alt="Preview"
-                    className="w-16 h-16 object-cover rounded-full border border-gray-500"
+className="w-16 h-16 object-cover rounded-full border border-gray-500 max-w-full"
                   />
                 </td>
                 <td className="px-4 py-3">
