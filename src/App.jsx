@@ -70,7 +70,6 @@ function App() {
     form.append("imageFile", image.file);
     form.append("description", image.description);
     form.append("imageIndex", index);
-    form.append("language", formData.language);
 
     try {
       const response = await axios.post(apiUrl, form, {
