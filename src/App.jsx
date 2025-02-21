@@ -21,6 +21,7 @@ function App() {
     living_area: "",
     link: "",
     project_details: [],
+    language: "",
   });
 
   useEffect(() => {
@@ -42,6 +43,7 @@ function App() {
           living_area: parsedData.living_area || "",
           link: parsedData.link || "",
           project_details: parsedData.project_details || [],
+          language: parsedData.language || "",
         });
 
         if (parsedData.project_details) {
@@ -68,6 +70,7 @@ function App() {
     form.append("imageFile", image.file);
     form.append("description", image.description);
     form.append("imageIndex", index);
+    form.append("language", formData.language);
 
     try {
       const response = await axios.post(apiUrl, form, {

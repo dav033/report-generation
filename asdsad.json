@@ -1,0 +1,257 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Make.com Webhook Integration",
+    "version": "1.0.0",
+    "description": "Webhook para generar reportes de proyectos, agendar reuniones en Google Meet, consultar información de usuario y procesar números de proyecto."
+  },
+  "servers": [
+    {
+      "url": "https://hook.us1.make.com",
+      "description": "Make.com Webhook Base URL"
+    }
+  ],
+  "paths": {
+    "/e5lysleszeaf4rg0s8mr9opyn4yrfchy": {
+      "post": {
+        "summary": "Generar reportes de proyectos",
+        "operationId": "generarReporteProyecto",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customer_name": {
+                    "type": "string",
+                    "description": "Nombre del cliente"
+                  },
+                  "language": {
+                    "type": "string",
+                    "description": "Idioma de la hoja de datos",
+                    "enum": ["es", "en"]
+                  },
+                  "project_address": {
+                    "type": "string",
+                    "description": "Dirección del proyecto"
+                  },
+                  "living_area_sqft": {
+                    "type": "number",
+                    "description": "Área habitable en pies cuadrados"
+                  },
+                  "appraisal_link": {
+                    "type": "string",
+                    "format": "uri",
+                    "description": "Enlace a la tasación"
+                  },
+                  "project_details": {
+                    "type": "array",
+                    "description": "Detalles del proyecto",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "area": {
+                          "type": "string",
+                          "description": "Área específica"
+                        },
+                        "category": {
+                          "type": "string",
+                          "description": "Categoría del detalle"
+                        },
+                        "comments": {
+                          "type": "string",
+                          "description": "Comentarios adicionales"
+                        },
+                        "dataSheet": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Enlace a la hoja de datos"
+                        }
+                      },
+                      "required": ["area", "category"]
+                    }
+                  }
+                },
+                "required": [
+                  "customer_name",
+                  "project_address",
+                  "living_area_sqft",
+                  "appraisal_link"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta de Make.com con el resultado del reporte.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status_code": {
+                      "type": "integer",
+                      "description": "Código de estado HTTP devuelto por Make.com",
+                      "example": 200
+                    },
+                    "response_data": {
+                      "type": "string",
+                      "description": "Datos de la respuesta de Make.com en formato de string codificado",
+                      "example": "%7B%22customer_name%22%3A%20%22Juliana%22%2C%20%22project_address%22%3A%20%22Cra%205%22..."
+                    },
+                    "action_id": {
+                      "type": "string",
+                      "description": "ID de la acción en Make.com",
+                      "example": "g-969970165a155f63e9b7208f77d6c8f027f5f815"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/o69bph4fwyat8iudecceuledtt3puib3": {
+      "post": {
+        "summary": "Crear una reunión en Google Meet",
+        "operationId": "crearReunionGoogleMeet",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "organizador": {
+                    "type": "string",
+                    "description": "Nombre del organizador de la reunión."
+                  },
+                  "correos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "email"
+                    },
+                    "description": "Lista de correos electrónicos de los participantes."
+                  },
+                  "start_date": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Fecha y hora de inicio de la reunión en formato ISO 8601."
+                  },
+                  "end_date": {
+                    "type": "string",
+                    "format": "date-time",
+                    "description": "Fecha y hora de finalización de la reunión en formato ISO 8601."
+                  },
+                  "descripcion": {
+                    "type": "string",
+                    "description": "Descripción o propósito de la reunión."
+                  }
+                },
+                "required": ["organizador", "correos", "start_date", "end_date"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reunión creada con éxito.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Estado del proceso",
+                      "example": "success"
+                    },
+                    "message": {
+                      "type": "string",
+                      "description": "Mensaje de confirmación",
+                      "example": "Reunión creada con éxito"
+                    },
+                    "google_meet_link": {
+                      "type": "string",
+                      "format": "uri",
+                      "description": "Enlace de la reunión en Google Meet"
+                    },
+                    "evento_id": {
+                      "type": "string",
+                      "description": "ID del evento en Google Calendar"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/5mxy7swbdf04fg78putpjf5pr5fjhdzo": {
+      "post": {
+        "summary": "Procesar número de proyecto",
+        "operationId": "procesarNumeroProyecto",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "numero_proyecto": {
+                    "type": "string",
+                    "description": "Número único del proyecto a procesar."
+                  }
+                },
+                "required": ["numero_proyecto"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta de Make.com con la información procesada del proyecto.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "description": "Estado del procesamiento",
+
+                      "properties": {
+                        "nombre": {
+                          "type": "string",
+                          "description": "Nombre del proyecto."
+                        },
+                        "cliente": {
+                          "type": "string",
+                          "description": "Nombre del cliente asociado al proyecto."
+                        },
+                        "estado": {
+                          "type": "string",
+                          "description": "Estado actual del proyecto."
+                        }
+                      }
+                    },
+                    "mensaje": {
+                      "type": "string",
+                      "description": "Mensaje adicional de Make.com",
+                      "example": "Proyecto procesado exitosamente."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
