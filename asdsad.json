@@ -14,7 +14,7 @@
   "paths": {
     "/e5lysleszeaf4rg0s8mr9opyn4yrfchy": {
       "post": {
-        "summary": "Generar reportes de proyectos",
+        "summary": "Generar reportes de proyectos: Primera visita",
         "operationId": "generarReporteProyecto",
         "requestBody": {
           "required": true,
@@ -79,6 +79,110 @@
                   "living_area_sqft",
                   "appraisal_link",
                   "language"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Respuesta de Make.com con el resultado del reporte.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status_code": {
+                      "type": "integer",
+                      "description": "Código de estado HTTP devuelto por Make.com",
+                      "example": 200
+                    },
+                    "response_data": {
+                      "type": "string",
+                      "description": "Datos de la respuesta de Make.com en formato de string codificado",
+                      "example": "%7B%22customer_name%22%3A%20%22Juliana%22%2C%20%22project_address%22%3A%20%22Cra%205%22..."
+                    },
+                    "action_id": {
+                      "type": "string",
+                      "description": "ID de la acción en Make.com",
+                      "example": "g-969970165a155f63e9b7208f77d6c8f027f5f815"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/padd94funwyk9mkz2242jpbl7gsl400s": {
+      "post": {
+        "summary": "Crear Reporte: restauracion: Seguimiento",
+        "operationId": "registrarInformacionProyecto",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "idioma": {
+                    "type": "string",
+                    "description": "Idioma del proyecto",
+                    "enum": ["es", "en"]
+                  },
+                  "project_numer": {
+                    "type": "string",
+                    "description": "Número del proyecto",
+                    "example": "PR-1234"
+                  },
+                  "project_name": {
+                    "type": "string",
+                    "description": "Nombre del proyecto",
+                    "example": "Restauración de fachada"
+                  },
+                  "project_location": {
+                    "type": "string",
+                    "description": "Ubicación del proyecto"
+                  },
+                  "client_name": {
+                    "type": "string",
+                    "description": "Nombre del cliente"
+                  },
+                  "customer_name": {
+                    "type": "string",
+                    "description": "Nombre del usuario final"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Correo electrónico de contacto"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "Número de teléfono de contacto"
+                  },
+                  "date_started": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Fecha de inicio del proyecto en formato YYYY-MM-DD"
+                  },
+                  "overview": {
+                    "type": "string",
+                    "description": "Descripción general del proyecto"
+                  }
+                },
+                "required": [
+                  "idioma",
+                  "project_name",
+                  "project_location",
+                  "client_name",
+                  "customer_name",
+                  "email",
+                  "phone",
+                  "date_started",
+                  "overview",
+                  "project_numer"
                 ]
               }
             }
