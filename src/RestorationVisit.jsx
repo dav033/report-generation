@@ -19,10 +19,8 @@ function RestorationVisit() {
     date_started: "",
     overview: "",
     language: "",
-    // Cada actividad tiene la descripción y opcionalmente la imagen asociada.
-    activities: [], // Ejemplo: { activity: "", imageId: "", imageFile: null }
-    additional_activities: [], // Misma estructura que activities
-    // next_activities y observations son arrays de strings
+    activities: [],
+    additional_activities: [],
     next_activities: [],
     observations: [],
   });
@@ -102,9 +100,7 @@ function RestorationVisit() {
   };
 
   const deleteAdditionalActivityRow = (index) => {
-    const updated = formData.additional_activities.filter(
-      (_, i) => i !== index
-    );
+    const updated = formData.additional_activities.filter((_, i) => i !== index);
     setFormData({ ...formData, additional_activities: updated });
   };
 
@@ -148,7 +144,7 @@ function RestorationVisit() {
     setFormData({ ...formData, observations: updated });
   };
 
-  // Función para subir la imagen, igual que en el primer componente (sin descripción)
+  // Función para subir la imagen
   const sendImageRequest = async (image, index) => {
     setLoading(true);
     const apiUrl = "https://hook.us1.make.com/gzmqvlipalsjxohvjncgtoe7xb8yxmx5";
@@ -227,7 +223,7 @@ function RestorationVisit() {
         "https://hook.us1.make.com/m8aizswomvuyttlq4mepsbbs6g1fr5ya";
       const response = await axios.post(finalApiUrl, { formData: finalData });
 
-      console.log(response.data, "Owo")
+      console.log(response.data, "Owo");
       window.location.href = response.data;
       setLoading(false);
     } catch (error) {
@@ -303,12 +299,25 @@ function RestorationVisit() {
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Overview"
-                id="overview"
-                onChange={handleInputChange}
-                value={formData.overview}
-              />
+              {/* Aquí reemplazamos el Input por un textarea inline */}
+              <div className="flex flex-col">
+                <label
+                  htmlFor="overview"
+                  className="relative block overflow-hidden border-b border-gray-200 bg-transparent pt-3 focus-within:border-blue-600 dark:border-gray-700 pt-4"
+                >
+                  <textarea
+                    id="overview"
+                    value={formData.overview}
+                    onChange={handleInputChange}
+                    placeholder="Overview"
+                    rows="4"
+                    className="peer w-full border-none bg-transparent p-0 placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 sm:text-sm dark:text-white"
+                  ></textarea>
+                  <span className="absolute start-0 top-2 -translate-y-1/2 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-xs dark:text-gray-200">
+                    Overview
+                  </span>
+                </label>
+              </div>
               <Input
                 label="Language"
                 id="language"
@@ -341,11 +350,7 @@ function RestorationVisit() {
                           <RowInput
                             value={row.activity}
                             onChange={(e) =>
-                              handleActivityChange(
-                                index,
-                                "activity",
-                                e.target.value
-                              )
+                              handleActivityChange(index, "activity", e.target.value)
                             }
                           />
                         </td>
@@ -353,11 +358,7 @@ function RestorationVisit() {
                           <input
                             type="file"
                             onChange={(e) =>
-                              handleActivityChange(
-                                index,
-                                "imageFile",
-                                e.target.files[0]
-                              )
+                              handleActivityChange(index, "imageFile", e.target.files[0])
                             }
                           />
                         </td>
@@ -408,11 +409,7 @@ function RestorationVisit() {
                           <RowInput
                             value={row.activity}
                             onChange={(e) =>
-                              handleAdditionalActivityChange(
-                                index,
-                                "activity",
-                                e.target.value
-                              )
+                              handleAdditionalActivityChange(index, "activity", e.target.value)
                             }
                           />
                         </td>
@@ -420,11 +417,7 @@ function RestorationVisit() {
                           <input
                             type="file"
                             onChange={(e) =>
-                              handleAdditionalActivityChange(
-                                index,
-                                "imageFile",
-                                e.target.files[0]
-                              )
+                              handleAdditionalActivityChange(index, "imageFile", e.target.files[0])
                             }
                           />
                         </td>
@@ -461,9 +454,7 @@ function RestorationVisit() {
                   type="text"
                   className="border p-2 rounded"
                   value={item}
-                  onChange={(e) =>
-                    handleNextActivityChange(index, e.target.value)
-                  }
+                  onChange={(e) => handleNextActivityChange(index, e.target.value)}
                 />
                 <button
                   type="button"
@@ -492,9 +483,7 @@ function RestorationVisit() {
                   type="text"
                   className="border p-2 rounded"
                   value={item}
-                  onChange={(e) =>
-                    handleObservationChange(index, e.target.value)
-                  }
+                  onChange={(e) => handleObservationChange(index, e.target.value)}
                 />
                 <button
                   type="button"
