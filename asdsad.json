@@ -133,7 +133,7 @@
                   },
                   "project_numer": {
                     "type": "string",
-                    "description": "Número del proyecto",
+                    "description": "Número del proyecto, este ya es proporcionado por el usurio al principio d ela conversacion, por lo que no es necesario solicitarlo nuevamente y se debe seguir utilizando el mismo número de proyecto",
                     "example": "PR-1234"
                   },
                   "project_name": {
@@ -170,6 +170,69 @@
                   "overview": {
                     "type": "string",
                     "description": "Descripción general del proyecto"
+                  },
+                  "additional_activities": {
+                    "type": "array",
+                    "description": "Actividades adicionales del proyecto",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "activity": {
+                          "type": "string",
+                          "description": "Nombre de la actividad"
+                        },
+                        "imageId": {
+                          "type": "string",
+                          "description": "ID de la imagen de la actividad"
+                        },
+                        "imageFile": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Enlace a la imagen de la actividad"
+                        }
+                      },
+                      "required": ["activity", "description"]
+                    }
+                  },
+                  "activities": {
+                    "type": "array",
+                    "description": "Actividades del proyecto",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "activity": {
+                          "type": "string",
+                          "description": "Nombre de la actividad"
+                        },
+                        "imageId": {
+                          "type": "string",
+                          "description": "ID de la imagen de la actividad"
+                        },
+                        "imageFile": {
+                          "type": "string",
+                          "format": "uri",
+                          "description": "Enlace a la imagen de la actividad"
+                        }
+                      },
+                      "required": ["activity", "description"]
+                    }
+                  },
+                  "next_activities": {
+                    "type": "array",
+                    "description": "Próximas actividades del proyecto",
+                    "items": {
+                      "type": "string",
+                      "description": "Nombre de la próxima actividad"
+                    }
+                  },
+                  "observations": {
+                    "type": "array",
+                    "description": "Observaciones del proyecto",
+                    "items": {
+                      "type": "string",
+                      "description": "Observación adicional"
+                    },
+                    "required": ["activity", "description"]
                   }
                 },
                 "required": [
@@ -329,7 +392,6 @@
                     "status": {
                       "type": "string",
                       "description": "Estado del procesamiento",
-
                       "properties": {
                         "nombre": {
                           "type": "string",

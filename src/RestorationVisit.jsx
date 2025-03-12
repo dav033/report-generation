@@ -31,8 +31,9 @@ function RestorationVisit() {
     if (encodedData) {
       try {
         const decodedData = JSON.parse(atob(encodedData));
+        console.log("Decoded data:", decodedData);
         setFormData({
-          project_number: decodedData.project_number || "",
+          project_number: decodedData.project_numer || "",
           project_name: decodedData.project_name || "",
           project_location: decodedData.project_location || "",
           client_name: decodedData.client_name || "",
