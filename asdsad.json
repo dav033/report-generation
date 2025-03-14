@@ -419,6 +419,116 @@
           }
         }
       }
+    },
+    "/v8cg8atqtnbfp7etxanyh8fqhdsxpnxa": {
+      "post": {
+        "summary": "Reporte final restauracion",
+        "operationId": "registrarFinalizacionProyecto",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "project_name": {
+                    "type": "string",
+                    "description": "Nombre del proyecto"
+                  },
+                  "project_location": {
+                    "type": "string",
+                    "description": "Ubicación del proyecto"
+                  },
+                  "client_name": {
+                    "type": "string",
+                    "description": "Nombre del cliente"
+                  },
+                  "contact_name": {
+                    "type": "string",
+                    "description": "Nombre de la persona de contacto"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Correo electrónico de contacto"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "Número de teléfono de contacto"
+                  },
+                  "completion_date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Fecha de finalización del proyecto en formato YYYY-MM-DD"
+                  },
+                  "overview": {
+                    "type": "string",
+                    "description": "overview o resumen, se debe sacar de una response previa"
+                  },
+                  "completed_activities": {
+                    "type": "array",
+                    "description": "Actividades completadas en el proyecto",
+                    "items": {
+                      "type": "string",
+                      "description": "Nombre de la actividad completada"
+                    }
+                  },
+                  "final_evaluation": {
+                    "type": "string",
+                    "description": "Evaluación final del proyecto"
+                  },
+                  "language": {
+                    "type": "string",
+                    "description": "Idioma del reporte",
+                    "enum": ["es", "en"]
+                  }
+                },
+                "required": [
+                  "project_name",
+                  "project_location",
+                  "client_name",
+                  "contact_name",
+                  "email",
+                  "phone",
+                  "completion_date",
+                  "overview",
+                  "final_evaluation",
+                  "language"
+                ]
+              }
+            }
+          }
+        },
+        "responses":{
+          "200": {
+            "description": "Respuesta de Make.com con el resultado del reporte.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status_code": {
+                      "type": "integer",
+                      "description": "Código de estado HTTP devuelto por Make.com",
+                      "example": 200
+                    },
+                    "response_data": {
+                      "type": "string",
+                      "description": "Datos de la respuesta de Make.com en formato de string codificado",
+                      "example": "%7B%22customer_name%22%3A%20%22Juliana%22%2C%20%22project_address%22%3A%20%22Cra%205%22..."
+                    },
+                    "action_id": {
+                      "type": "string",
+                      "description": "ID de la acción en Make.com",
+                      "example": "g-969970165a155f63e9b7208f77d6c8f027f5f815"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
