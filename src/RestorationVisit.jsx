@@ -1,69 +1,59 @@
-import { useState, useEffect } from "react";
+// RestorationVisit.jsx
+import { useState } from "react";
 import axios from "axios";
+import useFormData from "./hooks/useFormData";
+import FileUploader from "./components/FileUploader";
 import Input from "./components/Input.jsx";
 import TableHead from "./components/table/TableHead.tsx";
 import HeadCell from "./components/table/HeadCell.tsx";
 import TableBody from "./components/table/TableBody.tsx";
 import RowInput from "./components/table/RowInput.tsx";
+import { uploadImage } from "./utils";
+
+const initialData = {
+  project_number: "",
+  project_name: "",
+  project_location: "",
+  client_name: "",
+  customer_name: "",
+  email: "",
+  phone: "",
+  date_started: "",
+  overview: "",
+  language: "",
+  activities: [],
+  additional_activities: [],
+  next_activities: [],
+  observations: [],
+};
 
 function RestorationVisit() {
+  const { formData, setFormData, handleInputChange } = useFormData(initialData);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    project_number: "",
-    project_name: "",
-    project_location: "",
-    client_name: "",
-    customer_name: "",
-    email: "",
-    phone: "",
-    date_started: "",
-    overview: "",
-    language: "",
-    activities: [],
-    additional_activities: [],
-    next_activities: [],
-    observations: [],
-  });
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const encodedData = urlParams.get("data");
-    if (encodedData) {
-      try {
-        const decodedData = JSON.parse(atob(encodedData));
-        console.log("Decoded data:", decodedData);
-        setFormData({
-          project_number: decodedData.project_numer || "",
-          project_name: decodedData.project_name || "",
-          project_location: decodedData.project_location || "",
-          client_name: decodedData.client_name || "",
-          customer_name: decodedData.customer_name || "",
-          email: decodedData.email || "",
-          phone: decodedData.phone || "",
-          date_started: decodedData.date_started || "",
-          overview: decodedData.overview || "",
-          language: decodedData.language || "",
-          activities: decodedData.activities || [],
-          additional_activities: decodedData.additional_activities || [],
-          next_activities: decodedData.next_activities || [],
-          observations: decodedData.observations || [],
-        });
-      } catch (error) {
-        console.error("Error decodificando los datos:", error);
-      }
-    }
-  }, []);
-
-  // Manejo de inputs generales
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
-  };
-
-  // Funciones para la tabla de Activities
+  // Funciones para Activities
   const handleActivityChange = (index, field, value) => {
     const updated = formData.activities.map((item, i) =>
       i === index ? { ...item, [field]: value } : item
     );
+    setFormData({ ...formData, activities: updated });
+  };
+
+  const handleActivityFilesChange = (index, files) => {
+    const updated = formData.activities.map((item, i) =>
+      i === index ? { ...item, imageFiles: files } : item
+    );
+    setFormData({ ...formData, activities: updated });
+  };
+
+  const removeActivityFile = (rowIndex, fileIndex) => {
+    const updated = formData.activities.map((row, i) => {
+      if (i === rowIndex) {
+        const newFiles = row.imageFiles.filter((_, idx) => idx !== fileIndex);
+        return { ...row, imageFiles: newFiles };
+      }
+      return row;
+    });
     setFormData({ ...formData, activities: updated });
   };
 
@@ -72,7 +62,7 @@ function RestorationVisit() {
       ...formData,
       activities: [
         ...formData.activities,
-        { activity: "", imageId: "", imageFile: null },
+        { activity: "", imageFiles: [], imageIds: [] },
       ],
     });
   };
@@ -82,11 +72,29 @@ function RestorationVisit() {
     setFormData({ ...formData, activities: updated });
   };
 
-  // Funciones para la tabla de Additional Activities
+  // Funciones para Additional Activities
   const handleAdditionalActivityChange = (index, field, value) => {
     const updated = formData.additional_activities.map((item, i) =>
       i === index ? { ...item, [field]: value } : item
     );
+    setFormData({ ...formData, additional_activities: updated });
+  };
+
+  const handleAdditionalActivityFilesChange = (index, files) => {
+    const updated = formData.additional_activities.map((item, i) =>
+      i === index ? { ...item, imageFiles: files } : item
+    );
+    setFormData({ ...formData, additional_activities: updated });
+  };
+
+  const removeAdditionalActivityFile = (rowIndex, fileIndex) => {
+    const updated = formData.additional_activities.map((row, i) => {
+      if (i === rowIndex) {
+        const newFiles = row.imageFiles.filter((_, idx) => idx !== fileIndex);
+        return { ...row, imageFiles: newFiles };
+      }
+      return row;
+    });
     setFormData({ ...formData, additional_activities: updated });
   };
 
@@ -95,7 +103,7 @@ function RestorationVisit() {
       ...formData,
       additional_activities: [
         ...formData.additional_activities,
-        { activity: "", imageId: "", imageFile: null },
+        { activity: "", imageFiles: [], imageIds: [] },
       ],
     });
   };
@@ -105,7 +113,7 @@ function RestorationVisit() {
     setFormData({ ...formData, additional_activities: updated });
   };
 
-  // Funciones para Next Activities (array de strings)
+  // Funciones para Next Activities
   const handleNextActivityChange = (index, value) => {
     const updated = formData.next_activities.map((item, i) =>
       i === index ? value : item
@@ -125,7 +133,7 @@ function RestorationVisit() {
     setFormData({ ...formData, next_activities: updated });
   };
 
-  // Funciones para Observations (array de strings)
+  // Funciones para Observations
   const handleObservationChange = (index, value) => {
     const updated = formData.observations.map((item, i) =>
       i === index ? value : item
@@ -145,90 +153,69 @@ function RestorationVisit() {
     setFormData({ ...formData, observations: updated });
   };
 
-  // Función para subir la imagen
-  const sendImageRequest = async (image, index) => {
-    setLoading(true);
-    const apiUrl = "https://hook.us1.make.com/gzmqvlipalsjxohvjncgtoe7xb8yxmx5";
-    const form = new FormData();
-    form.append("imageFile", image);
-    form.append("imageIndex", index);
-    try {
-      const response = await axios.post(apiUrl, form, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      setLoading(false);
-      return response.data;
-    } catch (error) {
-      console.error(`Error uploading image ${index}:`, error);
-      setLoading(false);
-      throw error;
-    }
-  };
-
   // Manejo del envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Mostrar loading inmediatamente
+    setLoading(true);
     try {
-      // Subir imágenes de activities
+      // Subir imágenes para activities
       const activitiesImageResponses = [];
       for (let i = 0; i < formData.activities.length; i++) {
         const row = formData.activities[i];
-        if (row.imageFile) {
-          const res = await sendImageRequest(row.imageFile, i);
-          activitiesImageResponses[i] = res;
+        if (row.imageFiles && row.imageFiles.length > 0) {
+          const responsesForRow = [];
+          for (let j = 0; j < row.imageFiles.length; j++) {
+            const res = await uploadImage(row.imageFiles[j], `${i}-${j}`);
+            responsesForRow.push(res);
+          }
+          activitiesImageResponses[i] = responsesForRow;
         }
       }
-      // Subir imágenes de additional activities
+
+      // Subir imágenes para additional activities
       const additionalActivitiesImageResponses = [];
       for (let i = 0; i < formData.additional_activities.length; i++) {
         const row = formData.additional_activities[i];
-        if (row.imageFile) {
-          const res = await sendImageRequest(row.imageFile, i);
-          additionalActivitiesImageResponses[i] = res;
+        if (row.imageFiles && row.imageFiles.length > 0) {
+          const responsesForRow = [];
+          for (let j = 0; j < row.imageFiles.length; j++) {
+            const res = await uploadImage(row.imageFiles[j], `${i}-${j}`);
+            responsesForRow.push(res);
+          }
+          additionalActivitiesImageResponses[i] = responsesForRow;
         }
       }
-      // Actualizar imageId en cada fila de activities y additional activities
+
+      // Actualizar imageIds en cada fila
       const updatedActivities = formData.activities.map((row, i) => {
-        if (row.imageFile && activitiesImageResponses[i])
-          return {
-            ...row,
-            imageId:
-              activitiesImageResponses[i].imageId ||
-              activitiesImageResponses[i],
-          };
+        if (row.imageFiles && activitiesImageResponses[i]) {
+          return { ...row, imageIds: activitiesImageResponses[i] };
+        }
         return row;
       });
-      const updatedAdditionalActivities = formData.additional_activities.map(
-        (row, i) => {
-          if (row.imageFile && additionalActivitiesImageResponses[i])
-            return {
-              ...row,
-              imageId:
-                additionalActivitiesImageResponses[i].imageId ||
-                additionalActivitiesImageResponses[i],
-            };
-          return row;
+
+      const updatedAdditionalActivities = formData.additional_activities.map((row, i) => {
+        if (row.imageFiles && additionalActivitiesImageResponses[i]) {
+          return { ...row, imageIds: additionalActivitiesImageResponses[i] };
         }
-      );
+        return row;
+      });
+
       const finalData = {
         ...formData,
         activities: updatedActivities,
         additional_activities: updatedAdditionalActivities,
       };
 
-      // Enviar los datos finales a la API
-      setLoading(true);
-      const finalApiUrl =
-        "https://hook.us1.make.com/m8aizswomvuyttlq4mepsbbs6g1fr5ya";
+      // Envío de datos a la API
+      const finalApiUrl = "https://hook.us1.make.com/m8aizswomvuyttlq4mepsbbs6g1fr5ya";
       const response = await axios.post(finalApiUrl, { formData: finalData });
-
-      console.log(response.data, "Owo");
       window.location.href = response.data;
       setLoading(false);
     } catch (error) {
       console.error("Error durante el envío del formulario:", error);
+      setLoading(false);
     }
   };
 
@@ -244,67 +231,26 @@ function RestorationVisit() {
           {/* Campos generales */}
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Project Number"
-                id="project_number"
-                onChange={handleInputChange}
-                value={formData.project_number}
-              />
-              <Input
-                label="Project Name"
-                id="project_name"
-                onChange={handleInputChange}
-                value={formData.project_name}
-              />
+              <Input label="Project Number" id="project_number" onChange={handleInputChange} value={formData.project_number} />
+              <Input label="Project Name" id="project_name" onChange={handleInputChange} value={formData.project_name} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Project Location"
-                id="project_location"
-                onChange={handleInputChange}
-                value={formData.project_location}
-              />
-              <Input
-                label="Client Name"
-                id="client_name"
-                onChange={handleInputChange}
-                value={formData.client_name}
-              />
+              <Input label="Project Location" id="project_location" onChange={handleInputChange} value={formData.project_location} />
+              <Input label="Client Name" id="client_name" onChange={handleInputChange} value={formData.client_name} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Customer Name"
-                id="customer_name"
-                onChange={handleInputChange}
-                value={formData.customer_name}
-              />
-              <Input
-                label="Email"
-                id="email"
-                onChange={handleInputChange}
-                value={formData.email}
-              />
+              <Input label="Customer Name" id="customer_name" onChange={handleInputChange} value={formData.customer_name} />
+              <Input label="Email" id="email" onChange={handleInputChange} value={formData.email} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Phone"
-                id="phone"
-                onChange={handleInputChange}
-                value={formData.phone}
-              />
-              <Input
-                label="Date Started"
-                id="date_started"
-                onChange={handleInputChange}
-                value={formData.date_started}
-              />
+              <Input label="Phone" id="phone" onChange={handleInputChange} value={formData.phone} />
+              <Input label="Date Started" id="date_started" onChange={handleInputChange} value={formData.date_started} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Aquí reemplazamos el Input por un textarea inline */}
               <div className="flex flex-col">
                 <label
                   htmlFor="overview"
-                  className="relative block overflow-hidden border-b border-gray-200 bg-transparent pt-3 focus-within:border-blue-600 dark:border-gray-700 pt-4"
+                  className="relative block overflow-hidden border-b border-gray-200 bg-transparent pt-3 dark:border-gray-700 pt-4"
                 >
                   <textarea
                     id="overview"
@@ -312,19 +258,14 @@ function RestorationVisit() {
                     onChange={handleInputChange}
                     placeholder="Overview"
                     rows="4"
-                    className="peer w-full border-none bg-transparent p-0 placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0 sm:text-sm dark:text-white"
+                    className="peer w-full border-none bg-transparent p-0 placeholder-transparent focus:outline-none focus:ring-0 sm:text-sm dark:text-white"
                   ></textarea>
                   <span className="absolute start-0 top-2 -translate-y-1/2 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-2 peer-focus:text-xs dark:text-gray-200">
                     Overview
                   </span>
                 </label>
               </div>
-              <Input
-                label="Language"
-                id="language"
-                onChange={handleInputChange}
-                value={formData.language}
-              />
+              <Input label="Language" id="language" onChange={handleInputChange} value={formData.language} />
             </div>
           </div>
 
@@ -337,30 +278,24 @@ function RestorationVisit() {
                   <TableHead>
                     <tr>
                       <HeadCell>Activity</HeadCell>
-                      <HeadCell>Image (opcional)</HeadCell>
+                      <HeadCell>Images (opcional)</HeadCell>
                       <HeadCell>Actions</HeadCell>
                     </tr>
                   </TableHead>
                   <TableBody>
                     {formData.activities.map((row, index) => (
-                      <tr
-                        key={index}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                      >
+                      <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="p-4">
                           <RowInput
                             value={row.activity}
-                            onChange={(e) =>
-                              handleActivityChange(index, "activity", e.target.value)
-                            }
+                            onChange={(e) => handleActivityChange(index, "activity", e.target.value)}
                           />
                         </td>
                         <td className="p-4">
-                          <input
-                            type="file"
-                            onChange={(e) =>
-                              handleActivityChange(index, "imageFile", e.target.files[0])
-                            }
+                          <FileUploader
+                            files={row.imageFiles}
+                            onFilesChange={(files) => handleActivityFilesChange(index, files)}
+                            onRemoveFile={(fileIndex) => removeActivityFile(index, fileIndex)}
                           />
                         </td>
                         <td className="p-4">
@@ -396,30 +331,24 @@ function RestorationVisit() {
                   <TableHead>
                     <tr>
                       <HeadCell>Activity</HeadCell>
-                      <HeadCell>Image (opcional)</HeadCell>
+                      <HeadCell>Images (opcional)</HeadCell>
                       <HeadCell>Actions</HeadCell>
                     </tr>
                   </TableHead>
                   <TableBody>
                     {formData.additional_activities.map((row, index) => (
-                      <tr
-                        key={index}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                      >
+                      <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="p-4">
                           <RowInput
                             value={row.activity}
-                            onChange={(e) =>
-                              handleAdditionalActivityChange(index, "activity", e.target.value)
-                            }
+                            onChange={(e) => handleAdditionalActivityChange(index, "activity", e.target.value)}
                           />
                         </td>
                         <td className="p-4">
-                          <input
-                            type="file"
-                            onChange={(e) =>
-                              handleAdditionalActivityChange(index, "imageFile", e.target.files[0])
-                            }
+                          <FileUploader
+                            files={row.imageFiles}
+                            onFilesChange={(files) => handleAdditionalActivityFilesChange(index, files)}
+                            onRemoveFile={(fileIndex) => removeAdditionalActivityFile(index, fileIndex)}
                           />
                         </td>
                         <td className="p-4">
