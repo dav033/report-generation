@@ -1,10 +1,7 @@
-// FileUploader.jsx
-import React from "react";
-
-function FileUploader({ files, onFilesChange, onRemoveFile, label = "Upload Images" }) {
+function FileUploader({ files = [], onFilesChange, onRemoveFile, label = "Upload Images" }) {
   const handleChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
-    // Se unen los archivos ya existentes con los nuevos
+    // Combine existing files with newly selected files
     const newFiles = [...files, ...selectedFiles];
     onFilesChange(newFiles);
   };
@@ -37,5 +34,4 @@ function FileUploader({ files, onFilesChange, onRemoveFile, label = "Upload Imag
     </div>
   );
 }
-
 export default FileUploader;
