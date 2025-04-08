@@ -23,10 +23,16 @@ const initialData = {
   overview: "",
   completed_activities: [],
   evidence_images: [],
+  client_name: "",
 };
 
 function FinalRestorationReport() {
   const { formData, setFormData, handleInputChange } = useFormData(initialData);
+
+  setFormData((prev) => ({
+    ...prev,
+    customer_name: prev.client_name,
+  }));
   const [loading, setLoading] = useState(false);
 
   // Funciones para Completed Activities (array de strings)
