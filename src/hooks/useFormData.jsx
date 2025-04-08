@@ -10,8 +10,13 @@ const useFormData = (initialData) => {
     if (encodedData) {
       try {
         const decodedData = JSON.parse(atob(encodedData));
-        // Actualizamos sólo los campos que ya existan en initialData para evitar
-        // sobreescribir propiedades específicas de cada formulario.
+
+        // Si client_name existe, lo reemplazamos con el valor de customer_name
+        if ("client_name" in decodedData && "customer_name" in decodedData) {
+          decodedData.client_name = decodedData.customer_name;
+        }
+
+        // Actualizamos solo los campos que ya existan en initialData
         setFormData((prev) => ({ ...prev, ...decodedData }));
       } catch (error) {
         console.error("Error decodificando los datos:", error);
