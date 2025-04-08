@@ -1,5 +1,5 @@
 // FinalRestorationReport.jsx
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import useFormData from "./hooks/useFormData";
 import Input from "./components/Input.jsx";
@@ -29,10 +29,13 @@ const initialData = {
 function FinalRestorationReport() {
   const { formData, setFormData, handleInputChange } = useFormData(initialData);
 
-  setFormData((prev) => ({
-    ...prev,
-    customer_name: prev.client_name,
-  }));
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      customer_name: prev.client_name,
+    }));
+  }, [formData.client_name]);
+
   const [loading, setLoading] = useState(false);
 
   // Funciones para Completed Activities (array de strings)
@@ -116,7 +119,8 @@ function FinalRestorationReport() {
       };
 
       // Envío de datos a la API
-      const finalApiUrl = "https://hook.us1.make.com/ryrmjj7h6py9c0apei1lo186r80j4r5p";
+      const finalApiUrl =
+        "https://hook.us1.make.com/ryrmjj7h6py9c0apei1lo186r80j4r5p";
       const response = await axios.post(finalApiUrl, { formData: finalData });
       window.location.href = response.data;
       setLoading(false);
@@ -138,20 +142,60 @@ function FinalRestorationReport() {
           {/* Campos generales */}
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input label="Project Name" id="project_name" onChange={handleInputChange} value={formData.project_name} />
-              <Input label="Project Location" id="project_location" onChange={handleInputChange} value={formData.project_location} />
+              <Input
+                label="Project Name"
+                id="project_name"
+                onChange={handleInputChange}
+                value={formData.project_name}
+              />
+              <Input
+                label="Project Location"
+                id="project_location"
+                onChange={handleInputChange}
+                value={formData.project_location}
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input label="Client Name" id="client_name" onChange={handleInputChange} value={formData.client_name} />
-              <Input label="Customer Name" id="customer_name" onChange={handleInputChange} value={formData.customer_name} />
+              <Input
+                label="Client Name"
+                id="client_name"
+                onChange={handleInputChange}
+                value={formData.client_name}
+              />
+              <Input
+                label="Customer Name"
+                id="customer_name"
+                onChange={handleInputChange}
+                value={formData.customer_name}
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input label="Email" id="email" onChange={handleInputChange} value={formData.email} />
-              <Input label="Phone" id="phone" onChange={handleInputChange} value={formData.phone} />
+              <Input
+                label="Email"
+                id="email"
+                onChange={handleInputChange}
+                value={formData.email}
+              />
+              <Input
+                label="Phone"
+                id="phone"
+                onChange={handleInputChange}
+                value={formData.phone}
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input label="Completion Date" id="completion_date" onChange={handleInputChange} value={formData.completion_date} />
-              <Input label="Language" id="language" onChange={handleInputChange} value={formData.language} />
+              <Input
+                label="Completion Date"
+                id="completion_date"
+                onChange={handleInputChange}
+                value={formData.completion_date}
+              />
+              <Input
+                label="Language"
+                id="language"
+                onChange={handleInputChange}
+                value={formData.language}
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col">
@@ -207,11 +251,16 @@ function FinalRestorationReport() {
                   </TableHead>
                   <TableBody>
                     {formData.completed_activities.map((item, index) => (
-                      <tr key={index} className="hover:bg-gray-100 dark:hover:bg-gray-800">
+                      <tr
+                        key={index}
+                        className="hover:bg-gray-100 dark:hover:bg-gray-800"
+                      >
                         <td className="p-4">
                           <RowInput
                             value={item}
-                            onChange={(e) => handleActivityChange(index, e.target.value)}
+                            onChange={(e) =>
+                              handleActivityChange(index, e.target.value)
+                            }
                           />
                         </td>
                         <td className="p-4">
@@ -253,20 +302,37 @@ function FinalRestorationReport() {
                   </TableHead>
                   <TableBody>
                     {formData.evidence_images.map((row, index) => (
-                      <tr key={index} className="hover:bg-gray-100 dark:hover:bg-gray-800">
+                      <tr
+                        key={index}
+                        className="hover:bg-gray-100 dark:hover:bg-gray-800"
+                      >
                         <td className="p-4">
                           <RowInput
                             value={row.description}
-                            onChange={(e) => handleEvidenceChange(index, "description", e.target.value)}
+                            onChange={(e) =>
+                              handleEvidenceChange(
+                                index,
+                                "description",
+                                e.target.value
+                              )
+                            }
                           />
                         </td>
                         <td className="p-4">
                           <FileUploader
                             files={row.imageFiles}
-                            onFilesChange={(files) => handleEvidenceFilesChange(index, files)}
+                            onFilesChange={(files) =>
+                              handleEvidenceFilesChange(index, files)
+                            }
                             onRemoveFile={(fileIndex) => {
-                              const newFiles = row.imageFiles.filter((_, idx) => idx !== fileIndex);
-                              handleEvidenceChange(index, "imageFiles", newFiles);
+                              const newFiles = row.imageFiles.filter(
+                                (_, idx) => idx !== fileIndex
+                              );
+                              handleEvidenceChange(
+                                index,
+                                "imageFiles",
+                                newFiles
+                              );
                             }}
                             label="Upload Images"
                           />
