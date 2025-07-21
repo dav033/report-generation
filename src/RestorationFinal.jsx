@@ -55,7 +55,7 @@ function FinalRestorationReport() {
       ...prev,
       customer_name: prev.client_name || ""
     }));
-  }, [formData.client_name]);
+  }, [formData.client_name, setFormData]);
 
   const [loading, setLoading] = useState(false);
 
