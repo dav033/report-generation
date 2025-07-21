@@ -10,46 +10,83 @@ import TableBody from "./components/table/TableBody.tsx";
 import RowInput from "./components/table/RowInput.tsx";
 import { uploadImage } from "./utils";
 
-const initialData = {
-  project_number: "",
-  project_name: "",
-  project_location: "",
-  client_name: "",
-  customer_name: "",
-  email: "",
-  phone: "",
-  date_started: "",
-  overview: "",
-  language: "",
-  activities: [],
-  additional_activities: [],
-  next_activities: [],
-  observations: [],
+// Función para normalizar datos (convierte null/undefined a valores seguros)
+const normalizeData = (data) => {
+  return {
+    project_number: data.project_number || "",
+    project_name: data.project_name || "",
+    project_location: data.project_location || "",
+    client_name: data.client_name || "",
+    customer_name: data.customer_name || "",
+    email: data.email || "",
+    phone: data.phone || "",
+    date_started: data.date_started || "",
+    overview: data.overview || "",
+    language: data.language || "",
+    activities: Array.isArray(data.activities) 
+      ? data.activities.map(a => ({
+          activity: a.activity || "",
+          imageFiles: a.imageFiles || [],
+          imageIds: a.imageIds || []
+        })) 
+      : [],
+    additional_activities: Array.isArray(data.additional_activities) 
+      ? data.additional_activities.map(aa => ({
+          activity: aa.activity || "",
+          imageFiles: aa.imageFiles || [],
+          imageIds: aa.imageIds || []
+        })) 
+      : [],
+    next_activities: Array.isArray(data.next_activities) 
+      ? data.next_activities.map(na => na || "") 
+      : [],
+    observations: Array.isArray(data.observations) 
+      ? data.observations.map(obs => obs || "") 
+      : [],
+  };
+};
+
+const initialRawData = {
+  project_number: null,
+  project_name: null,
+  project_location: null,
+  client_name: null,
+  customer_name: null,
+  email: null,
+  phone: null,
+  date_started: null,
+  overview: null,
+  language: null,
+  activities: null,
+  additional_activities: null,
+  next_activities: null,
+  observations: null,
 };
 
 function RestorationVisit() {
-  const { formData, setFormData, handleInputChange } = useFormData(initialData);
+  const normalizedInitialData = normalizeData(initialRawData);
+  const { formData, setFormData, handleInputChange } = useFormData(normalizedInitialData);
   const [loading, setLoading] = useState(false);
 
   // Funciones para Activities
   const handleActivityChange = (index, field, value) => {
-    const updated = formData.activities.map((item, i) =>
+    const updated = (formData.activities || []).map((item, i) =>
       i === index ? { ...item, [field]: value } : item
     );
     setFormData({ ...formData, activities: updated });
   };
 
   const handleActivityFilesChange = (index, files) => {
-    const updated = formData.activities.map((item, i) =>
+    const updated = (formData.activities || []).map((item, i) =>
       i === index ? { ...item, imageFiles: files } : item
     );
     setFormData({ ...formData, activities: updated });
   };
 
   const removeActivityFile = (rowIndex, fileIndex) => {
-    const updated = formData.activities.map((row, i) => {
+    const updated = (formData.activities || []).map((row, i) => {
       if (i === rowIndex) {
-        const newFiles = row.imageFiles.filter((_, idx) => idx !== fileIndex);
+        const newFiles = (row.imageFiles || []).filter((_, idx) => idx !== fileIndex);
         return { ...row, imageFiles: newFiles };
       }
       return row;
@@ -61,36 +98,36 @@ function RestorationVisit() {
     setFormData({
       ...formData,
       activities: [
-        ...formData.activities,
+        ...(formData.activities || []),
         { activity: "", imageFiles: [], imageIds: [] },
       ],
     });
   };
 
   const deleteActivityRow = (index) => {
-    const updated = formData.activities.filter((_, i) => i !== index);
+    const updated = (formData.activities || []).filter((_, i) => i !== index);
     setFormData({ ...formData, activities: updated });
   };
 
   // Funciones para Additional Activities
   const handleAdditionalActivityChange = (index, field, value) => {
-    const updated = formData.additional_activities.map((item, i) =>
+    const updated = (formData.additional_activities || []).map((item, i) =>
       i === index ? { ...item, [field]: value } : item
     );
     setFormData({ ...formData, additional_activities: updated });
   };
 
   const handleAdditionalActivityFilesChange = (index, files) => {
-    const updated = formData.additional_activities.map((item, i) =>
+    const updated = (formData.additional_activities || []).map((item, i) =>
       i === index ? { ...item, imageFiles: files } : item
     );
     setFormData({ ...formData, additional_activities: updated });
   };
 
   const removeAdditionalActivityFile = (rowIndex, fileIndex) => {
-    const updated = formData.additional_activities.map((row, i) => {
+    const updated = (formData.additional_activities || []).map((row, i) => {
       if (i === rowIndex) {
-        const newFiles = row.imageFiles.filter((_, idx) => idx !== fileIndex);
+        const newFiles = (row.imageFiles || []).filter((_, idx) => idx !== fileIndex);
         return { ...row, imageFiles: newFiles };
       }
       return row;
@@ -102,20 +139,20 @@ function RestorationVisit() {
     setFormData({
       ...formData,
       additional_activities: [
-        ...formData.additional_activities,
+        ...(formData.additional_activities || []),
         { activity: "", imageFiles: [], imageIds: [] },
       ],
     });
   };
 
   const deleteAdditionalActivityRow = (index) => {
-    const updated = formData.additional_activities.filter((_, i) => i !== index);
+    const updated = (formData.additional_activities || []).filter((_, i) => i !== index);
     setFormData({ ...formData, additional_activities: updated });
   };
 
   // Funciones para Next Activities
   const handleNextActivityChange = (index, value) => {
-    const updated = formData.next_activities.map((item, i) =>
+    const updated = (formData.next_activities || []).map((item, i) =>
       i === index ? value : item
     );
     setFormData({ ...formData, next_activities: updated });
@@ -124,18 +161,18 @@ function RestorationVisit() {
   const addNextActivity = () => {
     setFormData({
       ...formData,
-      next_activities: [...formData.next_activities, ""],
+      next_activities: [...(formData.next_activities || []), ""],
     });
   };
 
   const deleteNextActivity = (index) => {
-    const updated = formData.next_activities.filter((_, i) => i !== index);
+    const updated = (formData.next_activities || []).filter((_, i) => i !== index);
     setFormData({ ...formData, next_activities: updated });
   };
 
   // Funciones para Observations
   const handleObservationChange = (index, value) => {
-    const updated = formData.observations.map((item, i) =>
+    const updated = (formData.observations || []).map((item, i) =>
       i === index ? value : item
     );
     setFormData({ ...formData, observations: updated });
@@ -144,24 +181,23 @@ function RestorationVisit() {
   const addObservation = () => {
     setFormData({
       ...formData,
-      observations: [...formData.observations, ""],
+      observations: [...(formData.observations || []), ""],
     });
   };
 
   const deleteObservation = (index) => {
-    const updated = formData.observations.filter((_, i) => i !== index);
+    const updated = (formData.observations || []).filter((_, i) => i !== index);
     setFormData({ ...formData, observations: updated });
   };
 
   // Manejo del envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Mostrar loading inmediatamente
     setLoading(true);
     try {
       // Subir imágenes para activities
       const activitiesImageResponses = [];
-      for (let i = 0; i < formData.activities.length; i++) {
+      for (let i = 0; i < (formData.activities || []).length; i++) {
         const row = formData.activities[i];
         if (row.imageFiles && row.imageFiles.length > 0) {
           const responsesForRow = [];
@@ -175,7 +211,7 @@ function RestorationVisit() {
 
       // Subir imágenes para additional activities
       const additionalActivitiesImageResponses = [];
-      for (let i = 0; i < formData.additional_activities.length; i++) {
+      for (let i = 0; i < (formData.additional_activities || []).length; i++) {
         const row = formData.additional_activities[i];
         if (row.imageFiles && row.imageFiles.length > 0) {
           const responsesForRow = [];
@@ -188,14 +224,14 @@ function RestorationVisit() {
       }
 
       // Actualizar imageIds en cada fila
-      const updatedActivities = formData.activities.map((row, i) => {
+      const updatedActivities = (formData.activities || []).map((row, i) => {
         if (row.imageFiles && activitiesImageResponses[i]) {
           return { ...row, imageIds: activitiesImageResponses[i] };
         }
         return row;
       });
 
-      const updatedAdditionalActivities = formData.additional_activities.map((row, i) => {
+      const updatedAdditionalActivities = (formData.additional_activities || []).map((row, i) => {
         if (row.imageFiles && additionalActivitiesImageResponses[i]) {
           return { ...row, imageIds: additionalActivitiesImageResponses[i] };
         }
@@ -283,7 +319,7 @@ function RestorationVisit() {
                     </tr>
                   </TableHead>
                   <TableBody>
-                    {formData.activities.map((row, index) => (
+                    {(formData.activities || []).map((row, index) => (
                       <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="p-4">
                           <RowInput
@@ -293,7 +329,7 @@ function RestorationVisit() {
                         </td>
                         <td className="p-4">
                           <FileUploader
-                            files={row.imageFiles}
+                            files={row.imageFiles || []}
                             onFilesChange={(files) => handleActivityFilesChange(index, files)}
                             onRemoveFile={(fileIndex) => removeActivityFile(index, fileIndex)}
                           />
@@ -336,7 +372,7 @@ function RestorationVisit() {
                     </tr>
                   </TableHead>
                   <TableBody>
-                    {formData.additional_activities.map((row, index) => (
+                    {(formData.additional_activities || []).map((row, index) => (
                       <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="p-4">
                           <RowInput
@@ -346,7 +382,7 @@ function RestorationVisit() {
                         </td>
                         <td className="p-4">
                           <FileUploader
-                            files={row.imageFiles}
+                            files={row.imageFiles || []}
                             onFilesChange={(files) => handleAdditionalActivityFilesChange(index, files)}
                             onRemoveFile={(fileIndex) => removeAdditionalActivityFile(index, fileIndex)}
                           />
@@ -378,7 +414,7 @@ function RestorationVisit() {
           {/* Sección de Next Activities */}
           <div className="mt-8">
             <h2 className="text-xl font-bold mb-4">Next Activities</h2>
-            {formData.next_activities.map((item, index) => (
+            {(formData.next_activities || []).map((item, index) => (
               <div key={index} className="flex items-center gap-2 mb-2">
                 <input
                   type="text"
@@ -407,7 +443,7 @@ function RestorationVisit() {
           {/* Sección de Observations */}
           <div className="mt-8">
             <h2 className="text-xl font-bold mb-4">Observations</h2>
-            {formData.observations.map((item, index) => (
+            {(formData.observations || []).map((item, index) => (
               <div key={index} className="flex items-center gap-2 mb-2">
                 <input
                   type="text"

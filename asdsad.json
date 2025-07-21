@@ -30,7 +30,10 @@
                   "language": {
                     "type": "string",
                     "description": "Idioma del reporte",
-                    "enum": ["es", "en"]
+                    "enum": [
+                      "es",
+                      "en"
+                    ]
                   },
                   "project_address": {
                     "type": "string",
@@ -69,7 +72,10 @@
                           "description": "Enlace a la hoja de datos"
                         }
                       },
-                      "required": ["area", "category"]
+                      "required": [
+                        "area",
+                        "category"
+                      ]
                     }
                   }
                 },
@@ -129,7 +135,10 @@
                   "idioma": {
                     "type": "string",
                     "description": "Idioma del proyecto",
-                    "enum": ["es", "en"]
+                    "enum": [
+                      "es",
+                      "en"
+                    ]
                   },
                   "project_numer": {
                     "type": "string",
@@ -191,7 +200,10 @@
                           "description": "Enlace a la imagen de la actividad"
                         }
                       },
-                      "required": ["activity", "description"]
+                      "required": [
+                        "activity",
+                        "description"
+                      ]
                     }
                   },
                   "activities": {
@@ -214,7 +226,10 @@
                           "description": "Enlace a la imagen de la actividad"
                         }
                       },
-                      "required": ["activity", "description"]
+                      "required": [
+                        "activity",
+                        "description"
+                      ]
                     }
                   },
                   "next_activities": {
@@ -232,7 +247,10 @@
                       "type": "string",
                       "description": "Observación adicional"
                     },
-                    "required": ["activity", "description"]
+                    "required": [
+                      "activity",
+                      "description"
+                    ]
                   }
                 },
                 "required": [
@@ -320,7 +338,12 @@
                     "description": "Descripción o propósito de la reunión."
                   }
                 },
-                "required": ["organizador", "correos", "start_date", "end_date"]
+                "required": [
+                  "organizador",
+                  "correos",
+                  "start_date",
+                  "end_date"
+                ]
               }
             }
           }
@@ -376,7 +399,9 @@
                     "description": "Número único del proyecto a procesar."
                   }
                 },
-                "required": ["numero_proyecto"]
+                "required": [
+                  "numero_proyecto"
+                ]
               }
             }
           }
@@ -480,7 +505,10 @@
                   "language": {
                     "type": "string",
                     "description": "Idioma del reporte",
-                    "enum": ["es", "en"]
+                    "enum": [
+                      "es",
+                      "en"
+                    ]
                   }
                 },
                 "required": [
@@ -499,7 +527,7 @@
             }
           }
         },
-        "responses":{
+        "responses": {
           "200": {
             "description": "Respuesta de Make.com con el resultado del reporte.",
             "content": {
