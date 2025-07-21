@@ -10,7 +10,29 @@ import RowInput from "./components/table/RowInput.tsx";
 import FileUploader from "./components/FileUploader";
 import { uploadImage } from "./utils.js";
 
-const initialData = {
+// Función para limpiar datos (convierte null a valores seguros)
+const cleanInitialData = (data) => {
+  return {
+    project_name: data.project_name || "",
+    project_location: data.project_location || "",
+    customer_name: data.customer_name || "",
+    email: data.email || "",
+    phone: data.phone || "",
+    completion_date: data.completion_date || "",
+    language: data.language || "",
+    final_evaluation: data.final_evaluation || "",
+    overview: data.overview || "",
+    completed_activities: data.completed_activities || [],
+    evidence_images: (data.evidence_images || []).map(e => ({
+      description: e.description || "",
+      imageFiles: e.imageFiles || [],
+      imageIds: e.imageIds || []
+    })),
+    client_name: data.client_name || "",
+  };
+};
+
+const initialData = cleanInitialData({
   project_name: "",
   project_location: "",
   customer_name: "",
@@ -23,24 +45,36 @@ const initialData = {
   completed_activities: [],
   evidence_images: [],
   client_name: "",
-};
+});
 
 function FinalRestorationReport() {
   const { formData, setFormData, handleInputChange } = useFormData(initialData);
 
   useEffect(() => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      customer_name: prev.client_name,
+      customer_name: prev.client_name || ""
     }));
   }, [formData.client_name]);
 
   const [loading, setLoading] = useState(false);
 
+  // Función segura para manejar cambios
+  const safeHandleInputChange = (e) => {
+    handleInputChange({
+      ...e,
+      target: {
+        ...e.target,
+        value: e.target.value === null ? "" : e.target.value
+      }
+    });
+  };
+
   // Funciones para Completed Activities (array de strings)
   const handleActivityChange = (index, value) => {
-    const updated = formData.completed_activities.map((item, i) =>
-      i === index ? value : item
+    const safeValue = value === null ? "" : value;
+    const updated = (formData.completed_activities || []).map((item, i) =>
+      i === index ? safeValue : item
     );
     setFormData({ ...formData, completed_activities: updated });
   };
@@ -48,19 +82,20 @@ function FinalRestorationReport() {
   const addActivityRow = () => {
     setFormData({
       ...formData,
-      completed_activities: [...formData.completed_activities, ""],
+      completed_activities: [...(formData.completed_activities || []), ""],
     });
   };
 
   const deleteActivityRow = (index) => {
-    const updated = formData.completed_activities.filter((_, i) => i !== index);
+    const updated = (formData.completed_activities || []).filter((_, i) => i !== index);
     setFormData({ ...formData, completed_activities: updated });
   };
 
   // Funciones para Evidence Images (objeto con description, imageFiles y imageIds)
   const handleEvidenceChange = (index, field, value) => {
-    const updated = formData.evidence_images.map((item, i) =>
-      i === index ? { ...item, [field]: value } : item
+    const safeValue = value === null ? "" : value;
+    const updated = (formData.evidence_images || []).map((item, i) =>
+      i === index ? { ...item, [field]: safeValue } : item
     );
     setFormData({ ...formData, evidence_images: updated });
   };
@@ -69,30 +104,37 @@ function FinalRestorationReport() {
     setFormData({
       ...formData,
       evidence_images: [
-        ...formData.evidence_images,
+        ...(formData.evidence_images || []),
         { description: "", imageFiles: [], imageIds: [] },
       ],
     });
   };
 
   const deleteEvidenceRow = (index) => {
-    const updated = formData.evidence_images.filter((_, i) => i !== index);
+    const updated = (formData.evidence_images || []).filter((_, i) => i !== index);
     setFormData({ ...formData, evidence_images: updated });
   };
 
   const handleEvidenceFilesChange = (index, files) => {
-    handleEvidenceChange(index, "imageFiles", files);
+    const safeFiles = files || [];
+    handleEvidenceChange(index, "imageFiles", safeFiles);
+  };
+
+  // Manejo seguro de eliminación de archivos
+  const handleRemoveEvidenceFile = (index, fileIndex) => {
+    const currentFiles = formData.evidence_images[index]?.imageFiles || [];
+    const newFiles = currentFiles.filter((_, idx) => idx !== fileIndex);
+    handleEvidenceChange(index, "imageFiles", newFiles);
   };
 
   // Manejo del envío del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Activar loading inmediatamente
     setLoading(true);
     try {
       // Subir imágenes para evidence_images
       const evidenceImagesResponses = [];
-      for (let i = 0; i < formData.evidence_images.length; i++) {
+      for (let i = 0; i < (formData.evidence_images || []).length; i++) {
         const row = formData.evidence_images[i];
         if (row.imageFiles && row.imageFiles.length > 0) {
           const responsesForRow = [];
@@ -105,7 +147,7 @@ function FinalRestorationReport() {
       }
 
       // Actualizar imageIds para evidence_images
-      const updatedEvidenceImages = formData.evidence_images.map((row, i) => {
+      const updatedEvidenceImages = (formData.evidence_images || []).map((row, i) => {
         if (row.imageFiles && evidenceImagesResponses[i]) {
           return { ...row, imageIds: evidenceImagesResponses[i] };
         }
@@ -144,56 +186,56 @@ function FinalRestorationReport() {
               <Input
                 label="Project Name"
                 id="project_name"
-                onChange={handleInputChange}
-                value={formData.project_name}
+                onChange={safeHandleInputChange}
+                value={formData.project_name || ""}
               />
               <Input
                 label="Project Location"
                 id="project_location"
-                onChange={handleInputChange}
-                value={formData.project_location}
+                onChange={safeHandleInputChange}
+                value={formData.project_location || ""}
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Input
                 label="Client Name"
                 id="client_name"
-                onChange={handleInputChange}
-                value={formData.client_name}
+                onChange={safeHandleInputChange}
+                value={formData.client_name || ""}
               />
               <Input
                 label="Customer Name"
                 id="customer_name"
-                onChange={handleInputChange}
-                value={formData.customer_name}
+                onChange={safeHandleInputChange}
+                value={formData.customer_name || ""}
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Input
                 label="Email"
                 id="email"
-                onChange={handleInputChange}
-                value={formData.email}
+                onChange={safeHandleInputChange}
+                value={formData.email || ""}
               />
               <Input
                 label="Phone"
                 id="phone"
-                onChange={handleInputChange}
-                value={formData.phone}
+                onChange={safeHandleInputChange}
+                value={formData.phone || ""}
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Input
                 label="Completion Date"
                 id="completion_date"
-                onChange={handleInputChange}
-                value={formData.completion_date}
+                onChange={safeHandleInputChange}
+                value={formData.completion_date || ""}
               />
               <Input
                 label="Language"
                 id="language"
-                onChange={handleInputChange}
-                value={formData.language}
+                onChange={safeHandleInputChange}
+                value={formData.language || ""}
               />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -204,8 +246,8 @@ function FinalRestorationReport() {
                 >
                   <textarea
                     id="final_evaluation"
-                    value={formData.final_evaluation}
-                    onChange={handleInputChange}
+                    value={formData.final_evaluation || ""}
+                    onChange={safeHandleInputChange}
                     placeholder="Final Evaluation"
                     rows="4"
                     className="peer w-full border-none bg-transparent p-0 placeholder-transparent focus:outline-none focus:ring-0 sm:text-sm dark:text-white"
@@ -222,8 +264,8 @@ function FinalRestorationReport() {
                 >
                   <textarea
                     id="overview"
-                    value={formData.overview}
-                    onChange={handleInputChange}
+                    value={formData.overview || ""}
+                    onChange={safeHandleInputChange}
                     placeholder="Overview"
                     rows="4"
                     className="peer w-full border-none bg-transparent p-0 placeholder-transparent focus:outline-none focus:ring-0 sm:text-sm dark:text-white"
@@ -249,14 +291,14 @@ function FinalRestorationReport() {
                     </tr>
                   </TableHead>
                   <TableBody>
-                    {formData.completed_activities.map((item, index) => (
+                    {(formData.completed_activities || []).map((item, index) => (
                       <tr
                         key={index}
                         className="hover:bg-gray-100 dark:hover:bg-gray-800"
                       >
                         <td className="p-4">
                           <RowInput
-                            value={item}
+                            value={item || ""}
                             onChange={(e) =>
                               handleActivityChange(index, e.target.value)
                             }
@@ -300,14 +342,14 @@ function FinalRestorationReport() {
                     </tr>
                   </TableHead>
                   <TableBody>
-                    {formData.evidence_images.map((row, index) => (
+                    {(formData.evidence_images || []).map((row, index) => (
                       <tr
                         key={index}
                         className="hover:bg-gray-100 dark:hover:bg-gray-800"
                       >
                         <td className="p-4">
                           <RowInput
-                            value={row.description}
+                            value={row.description || ""}
                             onChange={(e) =>
                               handleEvidenceChange(
                                 index,
@@ -319,19 +361,12 @@ function FinalRestorationReport() {
                         </td>
                         <td className="p-4">
                           <FileUploader
-                            files={row.imageFiles}
+                            files={row.imageFiles || []}
                             onFilesChange={(files) =>
                               handleEvidenceFilesChange(index, files)
                             }
                             onRemoveFile={(fileIndex) => {
-                              const newFiles = row.imageFiles.filter(
-                                (_, idx) => idx !== fileIndex
-                              );
-                              handleEvidenceChange(
-                                index,
-                                "imageFiles",
-                                newFiles
-                              );
+                              handleRemoveEvidenceFile(index, fileIndex);
                             }}
                             label="Upload Images"
                           />
