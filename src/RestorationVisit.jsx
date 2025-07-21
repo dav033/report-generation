@@ -1,4 +1,3 @@
-// RestorationVisit.jsx
 import { useState } from "react";
 import axios from "axios";
 import useFormData from "./hooks/useFormData";
@@ -10,8 +9,8 @@ import TableBody from "./components/table/TableBody.tsx";
 import RowInput from "./components/table/RowInput.tsx";
 import { uploadImage } from "./utils";
 
-// Función para normalizar datos (convierte null/undefined a valores seguros)
-const normalizeData = (data) => {
+// Función para limpiar datos iniciales (convierte null a "")
+const cleanInitialData = (data) => {
   return {
     project_number: data.project_number || "",
     project_name: data.project_name || "",
@@ -23,68 +22,72 @@ const normalizeData = (data) => {
     date_started: data.date_started || "",
     overview: data.overview || "",
     language: data.language || "",
-    activities: Array.isArray(data.activities) 
-      ? data.activities.map(a => ({
-          activity: a.activity || "",
-          imageFiles: a.imageFiles || [],
-          imageIds: a.imageIds || []
-        })) 
-      : [],
-    additional_activities: Array.isArray(data.additional_activities) 
-      ? data.additional_activities.map(aa => ({
-          activity: aa.activity || "",
-          imageFiles: aa.imageFiles || [],
-          imageIds: aa.imageIds || []
-        })) 
-      : [],
-    next_activities: Array.isArray(data.next_activities) 
-      ? data.next_activities.map(na => na || "") 
-      : [],
-    observations: Array.isArray(data.observations) 
-      ? data.observations.map(obs => obs || "") 
-      : [],
+    activities: (data.activities || []).map(a => ({
+      activity: a.activity || "",
+      imageFiles: a.imageFiles || [],
+      imageIds: a.imageIds || []
+    })),
+    additional_activities: (data.additional_activities || []).map(a => ({
+      activity: a.activity || "",
+      imageFiles: a.imageFiles || [],
+      imageIds: a.imageIds || []
+    })),
+    next_activities: data.next_activities || [],
+    observations: data.observations || [],
   };
 };
 
-const initialRawData = {
-  project_number: null,
-  project_name: null,
-  project_location: null,
-  client_name: null,
-  customer_name: null,
-  email: null,
-  phone: null,
-  date_started: null,
-  overview: null,
-  language: null,
-  activities: null,
-  additional_activities: null,
-  next_activities: null,
-  observations: null,
-};
+const initialData = cleanInitialData({
+  project_number: "",
+  project_name: "",
+  project_location: "",
+  client_name: "",
+  customer_name: "",
+  email: "",
+  phone: "",
+  date_started: "",
+  overview: "",
+  language: "",
+  activities: [],
+  additional_activities: [],
+  next_activities: [],
+  observations: [],
+});
 
 function RestorationVisit() {
-  const normalizedInitialData = normalizeData(initialRawData);
-  const { formData, setFormData, handleInputChange } = useFormData(normalizedInitialData);
+  const { formData, setFormData, handleInputChange } = useFormData(initialData);
   const [loading, setLoading] = useState(false);
+
+  // Función segura para manejar cambios
+  const safeHandleInputChange = (e) => {
+    handleInputChange({
+      ...e,
+      target: {
+        ...e.target,
+        value: e.target.value === null ? "" : e.target.value
+      }
+    });
+  };
 
   // Funciones para Activities
   const handleActivityChange = (index, field, value) => {
-    const updated = (formData.activities || []).map((item, i) =>
-      i === index ? { ...item, [field]: value } : item
+    const safeValue = value === null ? "" : value;
+    const updated = formData.activities.map((item, i) =>
+      i === index ? { ...item, [field]: safeValue } : item
     );
     setFormData({ ...formData, activities: updated });
   };
 
   const handleActivityFilesChange = (index, files) => {
-    const updated = (formData.activities || []).map((item, i) =>
-      i === index ? { ...item, imageFiles: files } : item
+    const safeFiles = files || [];
+    const updated = formData.activities.map((item, i) =>
+      i === index ? { ...item, imageFiles: safeFiles } : item
     );
     setFormData({ ...formData, activities: updated });
   };
 
   const removeActivityFile = (rowIndex, fileIndex) => {
-    const updated = (formData.activities || []).map((row, i) => {
+    const updated = formData.activities.map((row, i) => {
       if (i === rowIndex) {
         const newFiles = (row.imageFiles || []).filter((_, idx) => idx !== fileIndex);
         return { ...row, imageFiles: newFiles };
@@ -111,21 +114,23 @@ function RestorationVisit() {
 
   // Funciones para Additional Activities
   const handleAdditionalActivityChange = (index, field, value) => {
-    const updated = (formData.additional_activities || []).map((item, i) =>
-      i === index ? { ...item, [field]: value } : item
+    const safeValue = value === null ? "" : value;
+    const updated = formData.additional_activities.map((item, i) =>
+      i === index ? { ...item, [field]: safeValue } : item
     );
     setFormData({ ...formData, additional_activities: updated });
   };
 
   const handleAdditionalActivityFilesChange = (index, files) => {
-    const updated = (formData.additional_activities || []).map((item, i) =>
-      i === index ? { ...item, imageFiles: files } : item
+    const safeFiles = files || [];
+    const updated = formData.additional_activities.map((item, i) =>
+      i === index ? { ...item, imageFiles: safeFiles } : item
     );
     setFormData({ ...formData, additional_activities: updated });
   };
 
   const removeAdditionalActivityFile = (rowIndex, fileIndex) => {
-    const updated = (formData.additional_activities || []).map((row, i) => {
+    const updated = formData.additional_activities.map((row, i) => {
       if (i === rowIndex) {
         const newFiles = (row.imageFiles || []).filter((_, idx) => idx !== fileIndex);
         return { ...row, imageFiles: newFiles };
@@ -152,8 +157,9 @@ function RestorationVisit() {
 
   // Funciones para Next Activities
   const handleNextActivityChange = (index, value) => {
+    const safeValue = value === null ? "" : value;
     const updated = (formData.next_activities || []).map((item, i) =>
-      i === index ? value : item
+      i === index ? safeValue : item
     );
     setFormData({ ...formData, next_activities: updated });
   };
@@ -172,8 +178,9 @@ function RestorationVisit() {
 
   // Funciones para Observations
   const handleObservationChange = (index, value) => {
+    const safeValue = value === null ? "" : value;
     const updated = (formData.observations || []).map((item, i) =>
-      i === index ? value : item
+      i === index ? safeValue : item
     );
     setFormData({ ...formData, observations: updated });
   };
@@ -267,20 +274,60 @@ function RestorationVisit() {
           {/* Campos generales */}
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input label="Project Number" id="project_number" onChange={handleInputChange} value={formData.project_number} />
-              <Input label="Project Name" id="project_name" onChange={handleInputChange} value={formData.project_name} />
+              <Input 
+                label="Project Number" 
+                id="project_number" 
+                onChange={safeHandleInputChange} 
+                value={formData.project_number || ""} 
+              />
+              <Input 
+                label="Project Name" 
+                id="project_name" 
+                onChange={safeHandleInputChange} 
+                value={formData.project_name || ""} 
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input label="Project Location" id="project_location" onChange={handleInputChange} value={formData.project_location} />
-              <Input label="Client Name" id="client_name" onChange={handleInputChange} value={formData.client_name} />
+              <Input 
+                label="Project Location" 
+                id="project_location" 
+                onChange={safeHandleInputChange} 
+                value={formData.project_location || ""} 
+              />
+              <Input 
+                label="Client Name" 
+                id="client_name" 
+                onChange={safeHandleInputChange} 
+                value={formData.client_name || ""} 
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input label="Customer Name" id="customer_name" onChange={handleInputChange} value={formData.customer_name} />
-              <Input label="Email" id="email" onChange={handleInputChange} value={formData.email} />
+              <Input 
+                label="Customer Name" 
+                id="customer_name" 
+                onChange={safeHandleInputChange} 
+                value={formData.customer_name || ""} 
+              />
+              <Input 
+                label="Email" 
+                id="email" 
+                onChange={safeHandleInputChange} 
+                value={formData.email || ""} 
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input label="Phone" id="phone" onChange={handleInputChange} value={formData.phone} />
-              <Input label="Date Started" id="date_started" onChange={handleInputChange} value={formData.date_started} />
+              <Input 
+                label="Phone" 
+                id="phone" 
+                onChange={safeHandleInputChange} 
+                value={formData.phone || ""} 
+              />
+              <Input 
+                label="Date Started" 
+                id="date_started" 
+                onChange={safeHandleInputChange} 
+                value={formData.date_started || ""} 
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col">
@@ -290,8 +337,8 @@ function RestorationVisit() {
                 >
                   <textarea
                     id="overview"
-                    value={formData.overview}
-                    onChange={handleInputChange}
+                    value={formData.overview || ""}
+                    onChange={safeHandleInputChange}
                     placeholder="Overview"
                     rows="4"
                     className="peer w-full border-none bg-transparent p-0 placeholder-transparent focus:outline-none focus:ring-0 sm:text-sm dark:text-white"
@@ -301,7 +348,12 @@ function RestorationVisit() {
                   </span>
                 </label>
               </div>
-              <Input label="Language" id="language" onChange={handleInputChange} value={formData.language} />
+              <Input 
+                label="Language" 
+                id="language" 
+                onChange={safeHandleInputChange} 
+                value={formData.language || ""} 
+              />
             </div>
           </div>
 
@@ -323,7 +375,7 @@ function RestorationVisit() {
                       <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="p-4">
                           <RowInput
-                            value={row.activity}
+                            value={row.activity || ""}
                             onChange={(e) => handleActivityChange(index, "activity", e.target.value)}
                           />
                         </td>
@@ -376,7 +428,7 @@ function RestorationVisit() {
                       <tr key={index} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                         <td className="p-4">
                           <RowInput
-                            value={row.activity}
+                            value={row.activity || ""}
                             onChange={(e) => handleAdditionalActivityChange(index, "activity", e.target.value)}
                           />
                         </td>
@@ -419,7 +471,7 @@ function RestorationVisit() {
                 <input
                   type="text"
                   className="border p-2 rounded"
-                  value={item}
+                  value={item || ""}
                   onChange={(e) => handleNextActivityChange(index, e.target.value)}
                 />
                 <button
@@ -448,7 +500,7 @@ function RestorationVisit() {
                 <input
                   type="text"
                   className="border p-2 rounded"
-                  value={item}
+                  value={item || ""}
                   onChange={(e) => handleObservationChange(index, e.target.value)}
                 />
                 <button
