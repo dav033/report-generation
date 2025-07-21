@@ -13,7 +13,6 @@ import { uploadImage } from "./utils.js";
 const initialData = {
   project_name: "",
   project_location: "",
-  client_name: "",
   customer_name: "",
   email: "",
   phone: "",
