@@ -9,6 +9,7 @@ const cleanData = (data) => {
     project_location: data.project_location || "",
     client_name: data.client_name || "",
     customer_name: data.customer_name || "",
+    contact_name: data.contact_name || "",
     email: data.email || "",
     phone: data.phone || "",
     date_started: data.date_started || "",
@@ -26,6 +27,15 @@ const cleanData = (data) => {
     })),
     next_activities: data.next_activities || [],
     observations: data.observations || [],
+    // Para RestorationFinal.jsx
+    completed_activities: data.completed_activities || [],
+    evidence_images: (data.evidence_images || []).map(e => ({
+      description: e.description || "",
+      imageFiles: e.imageFiles || [],
+      imageIds: e.imageIds || []
+    })),
+    completion_date: data.completion_date || "",
+    final_evaluation: data.final_evaluation || "",
   };
 };
 
@@ -42,9 +52,9 @@ const useFormData = (initialData) => {
         // Limpiamos los datos decodificados
         const cleanedDecodedData = cleanData(decodedData);
 
-        // Si client_name existe, lo reemplazamos con el valor de customer_name
-        if ("client_name" in cleanedDecodedData && "customer_name" in cleanedDecodedData) {
-          cleanedDecodedData.client_name = cleanedDecodedData.customer_name;
+        // Si contact_name existe, lo mapeamos a customer_name
+        if ("contact_name" in cleanedDecodedData) {
+          cleanedDecodedData.customer_name = cleanedDecodedData.contact_name;
         }
 
         // Actualizamos solo los campos que ya existan en initialData
