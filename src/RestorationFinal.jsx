@@ -1,5 +1,5 @@
 // FinalRestorationReport.jsx
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import useFormData from "./hooks/useFormData";
 import Input from "./components/Input.jsx";
@@ -49,13 +49,6 @@ const initialData = cleanInitialData({
 
 function FinalRestorationReport() {
   const { formData, setFormData, handleInputChange } = useFormData(initialData);
-
-  useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      customer_name: prev.client_name || ""
-    }));
-  }, [formData.client_name, setFormData]);
 
   const [loading, setLoading] = useState(false);
 

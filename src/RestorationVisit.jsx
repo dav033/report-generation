@@ -12,7 +12,7 @@ import { uploadImage } from "./utils";
 // Función para limpiar datos iniciales (convierte null a "")
 const cleanInitialData = (data) => {
   return {
-    project_number: data.project_number || "",
+    project_numer: data.project_numer || "",
     project_name: data.project_name || "",
     project_location: data.project_location || "",
     client_name: data.client_name || "",
@@ -38,7 +38,7 @@ const cleanInitialData = (data) => {
 };
 
 const initialData = cleanInitialData({
-  project_number: "",
+  project_numer: "",
   project_name: "",
   project_location: "",
   client_name: "",
@@ -276,9 +276,9 @@ function RestorationVisit() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <Input 
                 label="Project Number" 
-                id="project_number" 
+                id="project_numer" 
                 onChange={safeHandleInputChange} 
-                value={formData.project_number || ""} 
+                value={formData.project_numer || ""} 
               />
               <Input 
                 label="Project Name" 
